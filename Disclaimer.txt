@@ -1,0 +1,10 @@
+DISCLAIMER
+==========================
+
+The Synchronoss Toolbox was made by a fellow criminal investigator who was determined to sift through the disorganized data provided by Synchronoss. It was made through mostly trial and error and with a lot of help from AI coding agents to create python scripts. It is not a polished tool made by professional coders. 
+
+Synchronoss Toolbox was created as a "one time use" tool for one specific case, but it's now being shared since the format could likely be similar for your Synchronoss returns. 
+
+If it doesn't work for your data... sorry about that. 
+
+GOOD LUCK!
