@@ -1,0 +1,73 @@
+User Guide - Synchronoss Parser
+===============================
+
+This guide summarizes the purpose of each module in the `synchronoss_parser` package and how to run them.
+
+attachment_log.py
+------------------
+Scans message CSV files, records every referenced attachment, and generates an Excel log and HTML table with thumbnails. Run with:
+```
+attachment-log [--messages DIR] [--out DIR]
+```
+
+build_exe.py
+------------
+Helper script that invokes PyInstaller for the provided `.spec` files to build standalone executables. Run the script to produce the GUI executables.
+
+collect_attachments.py
+-----------------------
+Collects files from `messages/attachments`, copies them into a `Compiled Attachments` folder, and logs metadata (sender, recipients, MD5, EXIF) to Excel. Example:
+```
+python -m synchronoss_parser.collect_attachments --attachments-root messages/attachments --compiled-path 'Compiled Attachments'
+```
+
+collect_media.py
+-----------------
+Copies media from a `VZMOBILE` backup into `Compiled Media` and records metadata to an Excel workbook. Use:
+```
+python -m synchronoss_parser.collect_media --root-path VZMOBILE --compiled-path 'VZMOBILE/Compiled Media'
+```
+
+collect_media_gui.py
+--------------------
+Tkinter GUI wrapper around `collect_media`. Choose input/output folders and run the collection with a progress bar.
+
+collect_quarantined_files.py
+----------------------------
+Extracts quarantined files (e.g., `*.zip_file_*`) from a Verizon backup, reconstructs split archives, and copies allowed media types to `Compiled Quarantine Files`.
+
+contacts_to_excel.py
+--------------------
+Parses `contacts.txt` dumps and converts them to an Excel spreadsheet. Run the CLI:
+```
+python -m synchronoss_parser.contacts_to_excel --input contacts.txt --output contacts.xlsx
+```
+Add `--gui` to launch a simple graphical interface.
+
+decrypt_unzip.py
+-----------------
+Provides `decrypt_and_unzip` to decrypt `.gpg` files and unpack nested archives. Useful for preparing raw backup data.
+
+merge_contacts_logs.py
+----------------------
+Annotates a call log CSV with names from a contacts Excel file, writing a new CSV with `caller_name` and `recipient_name` columns. Example:
+```
+python -m synchronoss_parser.merge_contacts_logs --call-log 'Call Log/call_log.csv' --contacts-xlsx contacts.xlsx
+```
+
+render_transcripts.py
+---------------------
+Renders message CSVs into HTML chat transcripts and an index page. Attachments are linked or embedded based on type. Run with:
+```
+python -m synchronoss_parser.render_transcripts --in messages --out transcripts [--contacts-xlsx contacts.xlsx]
+```
+The module defines a `Message` dataclass representing each chat entry.
+
+toolbox_gui.py
+---------------
+A multi-tab Tkinter GUI bundling the above utilities (Collect Media, Contacts to Excel, Render Transcripts, Collect Attachments, Collect Quarantined Files) for non-technical users.
+
+utils.py
+--------
+Helper functions such as `normalize_phone_number`, which strips all non-digit characters from a phone number.
+
