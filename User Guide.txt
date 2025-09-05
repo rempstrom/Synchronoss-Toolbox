@@ -81,3 +81,4 @@ Contacts file: [path/to/your/contacts_excel.xlsx] - Don't use the .txt file for 
 After clicking "Run", you should end up with a single folder containing bulk media and a sub folder named "compiled_attachment_log" which stores an excel spreadsheet of all of the media files found along with metadata for each file. 
 
 
+
