@@ -1,170 +1,83 @@
-# Synchronoss Parser
+User Guide - Synchronoss Parser
+===============================
 
-Utility scripts for working with Synchronoss data exports.
+This Synchronoss Toolbox is a project developed to assist with converting Verizon/Synchronoss backups into more useful formats so that they are easier to analyze by investigators. This tool was developed for one time use specific to a search warrant return that I recieved in 2025. Rather than keep it for myself I decided to share it. 
 
-This toolbox converts Verizon/Synchronoss backups into more useful formats. It can compile media
-files, convert contact lists, merge call logs with contacts, render HTML message transcripts and
-produce attachment inventories. A Tkinter GUI exposes these features for non‑technical users.
+Here is the recommended work flow: 
 
-Phone numbers are normalized by removing punctuation and an optional leading `1` country code so
-contacts match regardless of formatting.
 
-## Sample data layout
+Decrypt & Unzip
+===============================
 
-Scripts expect exports arranged like:
+The Decrypt/Upzip will decrypt GPG encrypted files and unzip any .zip archives. This function assumes you have downloaded all available files from the "leotransfers.com" page provided by Synchronoss, and that you have the password to decrypt the files. 
 
-```
-Call Log/
-  call_log.csv
-messages/
-  <date>.csv
-  attachments/
-    mms/in/<YYYY-MM-DD>/<files>
-    mms/out/<YYYY-MM-DD>/<files>
-```
+Encrypted Archive: [path/to/your/selection.zip]
+Output Folder: [path/to/your/output/folder]
+Password: [Decryption Password Provided by Synchronoss]
 
-## Installation
+Once you have input these fields, click "Run" and it will automatically decrypt the GPG encrypted files, and also unzip any .zip archives.
 
-Install the package and its dependencies with pip:
 
-```bash
-pip install .
-```
+Collect Quarantine Files
+===============================
 
-Tkinter may require additional OS-level packages.
+The Collect Quarantine Files will collected the quarantined media files and place them into a folder of your choice. This function assumes you now have an unencryped and unzipped "quarantine" folder containing several files with a .zip_file_* extension. The tool will read the file headers and determine what type of file it is, then add the proper extension.
 
-## Scripts
+Note: This function should be able to manage long file path names without errors.  
 
-### collect_media.py
-Copy media from a Verizon Mobile backup into a single folder and log EXIF metadata to Excel.
 
-```bash
-collect-media
-```
+Root Folder: [path/to/your/quarantine folder]
+Output Folder: [path/to/your/output/folder]
 
-### collect_attachments.py
-Collect message attachments from a Synchronoss export into a single folder and log metadata to
-Excel.
+Once you have input these fields, click "Run". You should end up with all of the quarantined media neatly in a single folder. 
 
-The script scans the `messages/attachments/` directory:
 
-```
-messages/
-  attachments/
-    mms/in/<YYYY-MM-DD>/<files>
-    mms/out/<YYYY-MM-DD>/<files>
-```
+Contacts to Excel
+===============================
 
-All files are copied to `Compiled Attachments/` and their details recorded in
-`Compiled Attachments/compiled_attachment_log/compiled_attachment_log.xlsx`.
+The Contacts to Excel function is designed to receive your -contacts.txt file and reformat it into a more human readable excel spreadsheet. 
 
-```bash
-collect-attachments
-```
+'Contacts.txt' File Path: [path/to/your/-contacts.txt]
+Output File: [Path/to/your/excel_file.xlsx]
 
-### contacts_to_excel.py
-Convert a `contacts.txt` export to an Excel spreadsheet.
+Once you have input these fields, click "Convert". You should end up with a single Excel spreadsheet. 
 
-```bash
-contacts-to-excel --input contacts.txt --output contacts.xlsx
-```
 
-### merge_contacts_logs.py
-Annotate a call log CSV with caller and recipient names using a contacts Excel file.
+Collect Media
+===============================
 
-```bash
-merge-contacts-logs --call-log "Call Log/call_log.csv" --contacts-xlsx contacts.xlsx
-```
+The Collect Media function assumes you have bulk media stored within numerous different folders. The tool assumes you have a "VZMOBILE" folder. It will go into every folder and extract the files, then place them into a folder of your choice. 
 
-### render_transcripts.py
-Render chat-bubble style HTML transcripts from message CSVs and link attachments. Optionally supply
-a contacts Excel file for name lookups.
+'VZMOBILE' Folder Path: [path/to/your/VZMOBILE folder]
+Output Folder: [path/to/your/output/folder]
+Contacts File: [path/to/your/contacts_excel.xlsx] - Don't use the .txt file for this
 
-```bash
-render-transcripts --in messages --out transcripts --contacts-xlsx contacts.xlsx
-```
+After clicking "Run", you should end up with a folder containing bulk media, and also a subfolder named "Compiled_media_log" which stores an excel spreadsheet log of all of the media files that it found as well as metadata for each file. 
 
-### decrypt_unzip.py
-Decrypt a top-level Synchronoss archive and expand any nested encrypted archives. The function
-recursively decrypts files ending in `.gpg` (e.g. `.zip.gpg`, `.txt.gpg`) using `gpg` and unpacks
-every archive it finds. `gpg` must be installed and available on your `PATH`. Processed `.zip` and
-`.gpg` archives are removed after extraction by default, but the original input archive is always
-preserved. Pass `cleanup=False` to retain all archives.
 
-```python
-from pathlib import Path
-from synchronoss_parser.decrypt_unzip import decrypt_and_unzip
+Render Transcripts
+===============================
 
-decrypt_and_unzip(Path("export.zip"), "passphrase")
-decrypt_and_unzip(Path("export.zip"), "passphrase", cleanup=False)  # keep archives
-```
+The Render Transcripts function will accept your "messages" folder and then generate HTML format chat threads. They should be displayed in a text message bubble format. The chats automatically pull the appropriate attachments into the chat. The tool will also cross reference the numbers saved in the contacts spreadsheet and fill in the names. The tool will separate out the phone calls into a separate "call log". 
 
-### toolbox_gui.py
-Tkinter GUI that wraps Collect Media, Collect Attachments, Contacts to Excel, Render Transcripts and
-Decrypt & Unzip workflows.
+Input Folder: [path/to/your/messages folder]
+Output Folder: [path/to/your/output/folder]
+Contacts File: [path/to/your/contacts_excel.xlsx] - Don't use the .txt file for this
+Target Phone number: [phone number of your target] 
 
-The Decrypt & Unzip tab accepts the path to an encrypted archive (``.zip``) and the password used
-to decrypt it. Any nested ``.gpg`` files are automatically decrypted, and any decrypted archives are
-expanded. The tab requires a local `gpg` installation to be present on the system path.
+This tool requests the 11 digit format of the target phone number due to the international code "1" being present (eg: 18882024564)
 
-```bash
-toolbox-gui
-```
+After clicking "Render", you should end up with multiple HTML format files (one per conversation) and a separate "call log" spreadsheet for voice calls. 
 
-### collect_media_gui.py
-Simple GUI wrapper for `collect_media.py`.
+Collect Attachments
+===============================
 
-```bash
-collect-media-gui
-```
+The Collect Attachments function essentially does the same thing as the Collect Media function. It assumes you have bulk media stored within an "attachments" folder. It will extract all of the media and place them into a single folder. The files will be renamed to show who sent the attachment, and the associated date. 
 
-### attachment_log.py
-Generate an inventory of all message attachments. The script scans message CSVs and
-records each attachment along with its sender and recipients, producing an Excel
-workbook and an HTML table with thumbnails.
+Attachments Folder: [path/to/your/attachments folder]
+Output Folder: [path/to/your/output/folder]
+Contacts file: [path/to/your/contacts_excel.xlsx] - Don't use the .txt file for this
 
-```bash
-attachment-log --messages messages --out "Attachment Log"
-```
+After clicking "Run", you should end up with a single folder containing bulk media and a sub folder named "compiled_attachment_log" which stores an excel spreadsheet of all of the media files found along with metadata for each file. 
 
-## Building Windows Executables
-
-Install PyInstaller:
-
-```bash
-pip install pyinstaller
-```
-
-Build one-file, windowed executables for the GUI scripts using the provided
-helper after installing the package:
-
-```bash
-build-exe
-```
-
-The command invokes PyInstaller on `toolbox_gui.spec` (and
-`collect_media_gui.spec` if present). PyInstaller places the resulting
-executables in `dist/` and bundles Python and all required libraries, so
-recipients don't need Python installed. On Windows, run them by
-double-clicking or from a Command Prompt:
-
-```bash
-dist\\toolbox_gui.exe
-dist\\collect_media_gui.exe
-```
-
-### Verifying the build
-
-Run the generated `.exe` on a clean Windows machine without Python
-installed to confirm the bundled interpreter works. Copy the file from
-`dist/` to the test system and launch it; the application should open
-normally without additional dependencies.
-
-## Testing
-
-Run the test suite with:
-
-```bash
-pytest
-```
 
